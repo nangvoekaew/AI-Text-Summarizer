@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Text Summarizer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="AI_TextSummarizer.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-robot"></i> AI Text Summarizer</h1>
+        </header>
+
+        <main>
+            <section class="input-section">
+                <h2>Text Input</h2>
+                <textarea id="articleText" placeholder="Enter text here. A minimum of 50 characters is recommended for effective summarization."></textarea>
+                <div class="char-word-count">
+                    <span id="charCount">0 characters</span> | <span id="wordCount">0 words</span>
+                </div>
+
+                <div class="length-controls">
+                    <div class="length-control-group">
+                        <label for="minLength">Min Length (tokens):</label>
+                        <input type="number" id="minLength" value="30" min="10" max="1000" title="Minimum number of tokens in the summary (approx. 5-7 chars per token)">
+                    </div>
+                    <div class="length-control-group">
+                        <label for="maxLength">Max Length (tokens):</label>
+                        <input type="number" id="maxLength" value="130" min="50" max="1000" title="Maximum number of tokens in the summary (approx. 5-7 chars per token)">
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button onclick="summarizeArticle()" id="summarizeButton" disabled><i class="fas fa-arrow-alt-circle-right"></i> Summarize Text</button>
+                    <button onclick="clearText()" id="clearButton" class="clear-btn" disabled><i class="fas fa-redo"></i> Reset Input</button>
+                </div>
+            </section>
+
+            <section class="output-section">
+                <h2>Summary Output</h2>
+                <div class="message-area">
+                    <div class="loader" id="loader"></div>
+                    <span id="loaderText" class="loader-text">Summarizing...</span>
+                    <span id="summaryMessage" class="error-message-text" style="display: none;"></span>
+                </div>
+                <p id="summaryOutput">Your generated summary will appear here. Adjust the length controls above for desired output length.</p>
+                <div class="char-word-count">
+                    <span id="summaryCharCount">0 characters</span> | <span id="summaryWordCount">0 words</span>
+                </div>
+                <div class="button-group">
+                    <button onclick="copySummary()" id="copyButton" class="copy-btn" disabled><i class="fas fa-copy"></i> Copy Summary</button>
+                </div>
+                <div id="copyFeedback" class="success-message-text" style="display: none;">Summary copied to clipboard!</div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Built with <span style="color: var(--accent-blue);">AI</span> Technology & <span style="color: var(--accent-blue);">Hugging Face</span> Transformers</p>
+            <p>&copy; 2025 AI Summarizer. All Rights Reserved By <span style="color: var(--accent-blue);">Juny & Leon (STIU Students)</span></p>
+        </footer>
+    </div>
+
+    <script>
+        const articleText = document.getElementById('articleText');
+        const summaryOutput = document.getElementById('summaryOutput');
+        const summarizeButton = document.getElementById('summarizeButton');
+        const clearButton = document.getElementById('clearButton');
+        const copyButton = document.getElementById('copyButton');
+        const loader = document.getElementById('loader');
+        const loaderText = document.getElementById('loaderText');
+        const charCount = document.getElementById('charCount');
+        const wordCount = document.getElementById('wordCount');
+        const summaryCharCount = document.getElementById('summaryCharCount');
+        const summaryWordCount = document.getElementById('summaryWordCount');
+
+        const minLengthInput = document.getElementById('minLength');
+        const maxLengthInput = document.getElementById('maxLength');
+        const summaryMessage = document.getElementById('summaryMessage');
+        const copyFeedback = document.getElementById('copyFeedback');
+
+        // Function to update character and word counts for the INPUT text area
+        function updateInputCounts() {
+            const text = articleText.value;
+            charCount.textContent = `${text.length} characters`;
+            const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+            wordCount.textContent = `${words.length} words`;
+
+            // Enable/disable summarize button based on input (at least 50 chars recommended)
+            if (text.trim().length >= 50) {
+                summarizeButton.disabled = false;
+            } else {
+                summarizeButton.disabled = true;
+            }
+            // Enable/disable clear button
+            clearButton.disabled = text.length === 0;
+        }
+
+        // Function to update character and word counts for the SUMMARY output box
+        function updateOutputCounts() {
+            const text = summaryOutput.textContent;
+            // Exclude the placeholder text from counting
+            if (!text || text === 'Your generated summary will appear here. Adjust the length controls above for desired output length.' || text.startsWith('Error:')) {
+                summaryCharCount.textContent = `0 characters`;
+                summaryWordCount.textContent = `0 words`;
+                copyButton.disabled = true; // Disable copy if it's placeholder/error
+            } else {
+                summaryCharCount.textContent = `${text.length} characters`;
+                const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+                summaryWordCount.textContent = `${words.length} words`;
+                copyButton.disabled = false; // Enable copy if there's actual content
+            }
+        }
+
+
+        // Add event listeners for length inputs (for subtle visual updates, not primary validation)
+        minLengthInput.addEventListener('input', updateInputCounts);
+        maxLengthInput.addEventListener('input', updateInputCounts);
+
+        // Event listener for textarea input
+        articleText.addEventListener('input', updateInputCounts);
+
+        // Initial count update
+        updateInputCounts();
+        updateOutputCounts(); // Initialize output counts too
+
+        async function summarizeArticle() {
+            const textToSummarize = articleText.value.trim();
+            const minLength = minLengthInput.value;
+            const maxLength = maxLengthInput.value;
+
+            // Client-side validation: Check text length
+            if (!textToSummarize || textToSummarize.length < 50) {
+                summaryOutput.textContent = "Please enter at least 50 characters of text to summarize."; // Set content immediately
+                displayMessage("Please enter at least 50 characters of text to summarize.", 'error');
+                updateOutputCounts(); // Update counts for the error message
+                return;
+            }
+            // Client-side validation: Check min/max lengths
+            if (parseInt(minLength) >= parseInt(maxLength)) {
+                summaryOutput.textContent = "Minimum length must be less than maximum length.";
+                displayMessage("Minimum length must be less than maximum length.", 'error');
+                updateOutputCounts();
+                return;
+            }
+            if (parseInt(minLength) < 10 || parseInt(maxLength) > 1000) {
+                summaryOutput.textContent = "Length values must be between 10 and 1000.";
+                displayMessage("Length values must be between 10 and 1000.", 'error');
+                updateOutputCounts();
+                return;
+            }
+
+            // UI feedback for loading state
+            loader.style.display = 'block';
+            loaderText.style.display = 'inline';
+            summaryMessage.style.display = 'none'; // Hide any previous error/success messages
+            summaryOutput.textContent = ''; // Clear previous output
+            updateOutputCounts(); // Clear output counts display
+            summarizeButton.disabled = true;
+            clearButton.disabled = true;
+            copyButton.disabled = true; // Disable copy button until new summary
+            copyFeedback.style.display = 'none'; // Hide copy success message
+
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/summarize', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: textToSummarize,
+                        max_length: parseInt(maxLength),
+                        min_length: parseInt(minLength)
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    summaryOutput.textContent = data.summary;
+                    displayMessage("Summary generated successfully!", 'success');
+                } else {
+                    summaryOutput.textContent = ``; // Clear output on API error
+                    displayMessage(`Error: ${data.error || 'Something went wrong on the server.'}`, 'error');
+                }
+            } catch (error) {
+                console.error('Fetch Error:', error);
+                summaryOutput.textContent = ``; // Clear output on network error
+                displayMessage("An error occurred while connecting to the summarization service. Please ensure the backend is running.", 'error');
+            } finally {
+                // Reset UI state
+                loader.style.display = 'none';
+                loaderText.style.display = 'none';
+                summarizeButton.disabled = false; // Re-enable summarize button
+                clearButton.disabled = false; // Re-enable clear button
+                updateInputCounts(); // Update input counts and re-evaluate button states
+                updateOutputCounts(); // Always update output counts after summary attempt
+            }
+        }
+
+        function clearText() {
+            articleText.value = '';
+            summaryOutput.textContent = 'Your generated summary will appear here. Adjust the length controls above for desired output length.';
+            displayMessage("", ''); // Clear all messages
+            copyButton.disabled = true; // Disable copy button
+            copyFeedback.style.display = 'none'; // Hide copy success message
+            updateInputCounts(); // Update input counts and button states
+            updateOutputCounts(); // Update output counts
+        }
+
+        async function copySummary() {
+            try {
+                const textToCopy = summaryOutput.textContent;
+                // Don't copy placeholder or error messages
+                if (!textToCopy || textToCopy === 'Your generated summary will appear here. Adjust the length controls above for desired output length.' || textToCopy.startsWith('Error:')) {
+                    displayMessage("Nothing valid to copy.", 'error');
+                    return;
+                }
+
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(textToCopy);
+                } else {
+                    // Fallback for older browsers or restricted environments
+                    const textarea = document.createElement('textarea');
+                    textarea.value = textToCopy;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                }
+
+                copyFeedback.style.display = 'block'; // Show success message
+                setTimeout(() => {
+                    copyFeedback.style.display = 'none'; // Hide after 3 seconds
+                }, 3000);
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+                displayMessage('Failed to copy summary. Your browser might not support automatic copying or is restricted.', 'error');
+            }
+        }
+
+        // Helper function to display messages
+        function displayMessage(message, type) {
+            summaryMessage.textContent = message;
+            summaryMessage.style.display = 'block';
+            // Reset and apply appropriate class
+            summaryMessage.classList.remove('error-message-text', 'success-message-text');
+            if (type === 'success') {
+                summaryMessage.classList.add('success-message-text');
+            } else if (type === 'error') {
+                summaryMessage.classList.add('error-message-text');
+            } else {
+                summaryMessage.style.display = 'none'; // Hide if no type or empty message
+            }
+        }
+    </script>
+</body>
+
+</html>

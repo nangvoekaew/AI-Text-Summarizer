@@ -1,0 +1,526 @@
+/* Variables for easy color management */
+
+:root {
+    --dark-bg-primary: #121212;
+    /* Deep background */
+    --dark-bg-secondary: #1a1a1a;
+    /* Card background */
+    --dark-bg-tertiary: #2a2a2a;
+    /* Input/section background */
+    --accent-blue: #00e0ff;
+    /* Bright blue for highlights */
+    --accent-blue-dark: #00aaff;
+    --text-light: #e0e0e0;
+    --text-muted: #888888;
+    --border-dark: #3a3a3a;
+    --error-red: #ff6b6b;
+    --success-green: #6bff6b;
+    --button-glow: rgba(0, 224, 255, 0.4);
+    --card-glow: rgba(0, 224, 255, 0.1);
+}
+
+
+/* General Body Styling */
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--dark-bg-primary);
+    color: var(--text-light);
+    line-height: 1.6;
+    margin: 0;
+    padding: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    background-image: radial-gradient(circle at top left, rgba(0, 224, 255, 0.05) 0%, transparent 40%), radial-gradient(circle at bottom right, rgba(255, 0, 255, 0.05) 0%, transparent 40%);
+    background-repeat: no-repeat;
+}
+
+
+/* Container for the whole application */
+
+.container {
+    background-color: var(--dark-bg-secondary);
+    border-radius: 20px;
+    box-shadow: 0 0 40px var(--card-glow);
+    padding: 50px;
+    max-width: 1400px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    border: 1px solid var(--border-dark);
+    position: relative;
+    z-index: 1;
+    transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+}
+
+.container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 60px var(--card-glow);
+}
+
+
+/* Header Styling */
+
+h1 {
+    font-family: 'Orbitron', sans-serif;
+    color: var(--accent-blue);
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: 700;
+    font-size: 3.2em;
+    letter-spacing: 2px;
+    text-shadow: 0 0 15px rgba(0, 224, 255, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+
+/* AI Icon Animation */
+
+h1 .fas.fa-robot {
+    animation: robot-float 4s infinite ease-in-out, robot-pulse 2.5s infinite ease-in-out;
+    display: inline-block;
+    color: var(--accent-blue);
+    font-size: 0.9em;
+    text-shadow: 0 0 10px rgba(0, 224, 255, 0.8);
+}
+
+@keyframes robot-float {
+    0% {
+        transform: translateY(0px) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-8px) rotate(3deg);
+    }
+    100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+}
+
+@keyframes robot-pulse {
+    0% {
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.8;
+    }
+}
+
+
+/* Main Content Layout - Horizontal Flexbox */
+
+main {
+    display: flex;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+
+/* Section Styling */
+
+.input-section,
+.output-section {
+    background-color: var(--dark-bg-tertiary);
+    border: 1px solid var(--border-dark);
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+    position: relative;
+    flex: 1;
+    min-width: 450px;
+}
+
+.input-section::before,
+.output-section::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    border-radius: 16px;
+    padding: 1px;
+    background: linear-gradient(45deg, var(--accent-blue), #ff00ea);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+    pointer-events: none;
+}
+
+.input-section:hover::before,
+.output-section:hover::before {
+    opacity: 1;
+}
+
+.input-section:hover,
+.output-section:hover {
+    transform: translateY(-3px);
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.4), 0 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+h2 {
+    font-family: 'Orbitron', sans-serif;
+    color: var(--accent-blue-dark);
+    margin-top: 0;
+    margin-bottom: 25px;
+    font-weight: 700;
+    font-size: 2.2em;
+    text-align: center;
+    border-bottom: 2px solid var(--border-dark);
+    padding-bottom: 10px;
+    display: inline-block;
+    margin-left: auto;
+    margin-right: auto;
+    text-shadow: 0 0 8px rgba(0, 170, 255, 0.4);
+}
+
+
+/* Textarea Styling - Adjusted for smaller text and taller box */
+
+textarea {
+    width: 100%;
+    padding: 18px;
+    border: 1px solid var(--border-dark);
+    border-radius: 10px;
+    background-color: #222222;
+    color: var(--text-light);
+    font-size: 1em;
+    /* Slightly smaller text */
+    min-height: 450px;
+    /* INCREASED HEIGHT HERE from 350px to 450px */
+    resize: vertical;
+    /* Allow vertical resizing */
+    box-sizing: border-box;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: inset 0 1px 5px rgba(0, 0, 0, 0.4);
+}
+
+textarea::placeholder {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+textarea:focus {
+    border-color: var(--accent-blue);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 224, 255, 0.4), inset 0 1px 5px rgba(0, 0, 0, 0.4);
+}
+
+
+/* Summary Output Styling - Made identical to textarea for visual consistency */
+
+#summaryOutput {
+    width: 100%;
+    /* Match textarea width */
+    padding: 18px;
+    /* Match textarea padding */
+    border: 1px solid var(--border-dark);
+    /* Match textarea border */
+    border-radius: 10px;
+    /* Match textarea border-radius */
+    background-color: #222222;
+    /* Match textarea background */
+    color: var(--text-light);
+    /* Match textarea text color */
+    font-size: 1em;
+    /* Match textarea font-size */
+    min-height: 450px;
+    /* This was already changed to 450px */
+    /* Removed resize: vertical as it's a p tag, not a textarea */
+    box-sizing: border-box;
+    /* Match textarea box-sizing */
+    font-family: 'Inter', sans-serif;
+    /* Match textarea font-family */
+    /* Removed transition: border-color, box-shadow as it's not interactive like textarea */
+    box-shadow: inset 0 1px 5px rgba(0, 0, 0, 0.4);
+    /* Match textarea box-shadow */
+    line-height: normal;
+    /* This was already changed to normal */
+    white-space: pre-wrap;
+    /* Preserves whitespace and line breaks */
+    overflow-y: auto;
+    /* Enables scrolling if content overflows */
+    position: relative;
+    z-index: 2;
+}
+
+
+/* Character/Word Count */
+
+.char-word-count {
+    text-align: right;
+    font-size: 0.95em;
+    color: var(--text-muted);
+    margin-top: 10px;
+}
+
+
+/* Length Controls */
+
+.length-controls {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 25px;
+    flex-wrap: wrap;
+}
+
+.length-control-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    min-width: 160px;
+}
+
+.length-control-group label {
+    font-weight: 600;
+    color: var(--text-light);
+    margin-bottom: 8px;
+    font-size: 1.05em;
+}
+
+.length-control-group input[type="number"] {
+    width: 90px;
+    padding: 12px;
+    border: 1px solid var(--border-dark);
+    border-radius: 8px;
+    text-align: center;
+    font-size: 1.1em;
+    font-family: 'Inter', sans-serif;
+    background-color: #222222;
+    color: var(--accent-blue);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.length-control-group input[type="number"]:focus {
+    border-color: var(--accent-blue);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 224, 255, 0.4);
+}
+
+
+/* Button Group */
+
+.button-group {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+
+button {
+    flex: 1;
+    padding: 18px 25px;
+    background: linear-gradient(90deg, #00c6ff, #0072ff);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.2em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease, box-shadow 0.4s ease;
+    box-shadow: 0 0 20px rgba(0, 224, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+button:hover {
+    background: linear-gradient(90deg, #0072ff, #00c6ff);
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 0 30px rgba(0, 224, 255, 0.6), 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+button:active {
+    transform: translateY(0);
+    box-shadow: 0 0 10px rgba(0, 224, 255, 0.2);
+}
+
+button:disabled {
+    background: #444;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+    color: #aaa;
+}
+
+button.clear-btn {
+    background: #4a4a4a;
+    box-shadow: 0 0 15px rgba(100, 100, 100, 0.2);
+}
+
+button.clear-btn:hover {
+    background: #5a5a5a;
+    box-shadow: 0 0 25px rgba(100, 100, 100, 0.4);
+}
+
+button.copy-btn {
+    background: linear-gradient(90deg, #4CAF50, #8BC34A);
+    box-shadow: 0 0 15px rgba(107, 255, 107, 0.3);
+}
+
+button.copy-btn:hover {
+    background: linear-gradient(90deg, #8BC34A, #4CAF50);
+    box-shadow: 0 0 25px rgba(107, 255, 107, 0.5);
+}
+
+
+/* Message Display (Loader, Errors, Success) */
+
+.message-area {
+    min-height: 30px;
+    text-align: center;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 1em;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+}
+
+.loader {
+    border: 4px solid #3a3a3a;
+    border-top: 4px solid var(--accent-blue);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    display: none;
+}
+
+.loader-text {
+    color: var(--accent-blue);
+    display: none;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.error-message-text {
+    color: var(--error-red);
+    text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+}
+
+.success-message-text {
+    color: var(--success-green);
+    text-shadow: 0 0 5px rgba(107, 255, 107, 0.5);
+}
+
+
+/* Footer Styling */
+
+footer {
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 25px;
+    border-top: 1px solid var(--border-dark);
+    color: var(--text-muted);
+    font-size: 0.95em;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+footer p {
+    margin: 5px 0;
+}
+
+
+/* Responsive Design */
+
+@media (max-width: 1200px) {
+    main {
+        flex-direction: column;
+        gap: 30px;
+    }
+    .input-section,
+    .output-section {
+        min-width: unset;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        padding: 20px;
+    }
+    .container {
+        padding: 30px;
+        margin: 0 auto;
+        gap: 25px;
+    }
+    h1 {
+        font-size: 2.5em;
+        gap: 15px;
+    }
+    h2 {
+        font-size: 1.8em;
+    }
+    .length-controls {
+        flex-direction: column;
+        gap: 15px;
+    }
+    .button-group {
+        flex-direction: column;
+        gap: 10px;
+    }
+    button {
+        padding: 15px 20px;
+        font-size: 1em;
+    }
+    textarea,
+    #summaryOutput {
+        min-height: 250px;
+        /* Adjusted for smaller screens */
+        font-size: 0.95em;
+    }
+    .message-area {
+        flex-direction: column;
+        gap: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+    .container {
+        padding: 20px;
+    }
+    h1 {
+        font-size: 1.8em;
+    }
+    h2 {
+        font-size: 1.5em;
+    }
+    textarea,
+    #summaryOutput {
+        min-height: 200px;
+        /* Further adjusted for very small screens */
+        font-size: 0.9em;
+    }
+}
