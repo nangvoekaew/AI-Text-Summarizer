@@ -33,4 +33,3 @@ AI_TextSummarizer.css: This file makes the website look good with its colors and
 # Thanks
 Hugging Face: For the tools that make the AI part possible.
 
-Juny & Leon (STIU Students): The people who made this project.
